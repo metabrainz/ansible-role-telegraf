@@ -1,0 +1,60 @@
+---
+- name: Install required dependencies on Ubuntu >= 20.04
+  apt:
+    name: gnupg
+    state: present
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version is version('20.04', '>=')
+
+- name: Install Telegraf repository key
+  apt_key:
+    id: "05CE15085FC09D18E99EFB22684A14CF2582E0C5"
+    url: "https://repos.influxdata.com/influxdb.key"
+    keyring: "/etc/apt/trusted.gpg.d/telegraf.gpg"
+    state: present
+
+- name: Install Telegraf repository
+  apt_repository:
+    repo: "deb https://repos.influxdata.com/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: yes
+
+- name: Install Telegraf
+  apt:
+    name: telegraf
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install Telegraf configuration
+  template:
+    src: "{{ item }}.j2"
+    dest: "/{{ item }}"
+    mode: 0644
+  with_items:
+    - etc/telegraf/telegraf.conf
+    - etc/telegraf/telegraf.d/ansible-inputs.conf
+  notify: restart telegraf
+  vars:
+    _telegraf_outputs: "{{ telegraf_outputs | combine(telegraf_group_outputs, recursive=True) | combine(telegraf_host_outputs, recursive=True) }}"
+    _telegraf_inputs: "{{ telegraf_inputs | combine(telegraf_group_inputs, recursive=True) | combine(telegraf_host_inputs, recursive=True) }}"
+    _telegraf_tags: "{{ telegraf_tags | combine(telegraf_group_tags) | combine(telegraf_host_tags) }}"
+
+- name: Add telegraf user to required groups
+  user:
+    name: telegraf
+    groups: "{{ item }}"
+    append: true
+  # groups may not exist yet ¯\_(ツ)_/¯
+  ignore_errors: true # noqa ignore-errors
+  when: item in _telegraf_inputs
+  loop:
+    - docker
+  notify: restart telegraf
+  vars:
+    _telegraf_inputs: "{{ telegraf_inputs | combine(telegraf_group_inputs) | combine(telegraf_host_inputs) }}"
+
+- name: Enable and start Telegraf
+  service:
+    name: telegraf
+    enabled: "{{ telegraf_service_enabled }}"
+    state: "{{ telegraf_service_state }}"
+  ignore_errors: "{{ ansible_check_mode }}"

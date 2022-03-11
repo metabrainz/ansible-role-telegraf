@@ -1,0 +1,7 @@
+---
+telegraf_agent_interval: 30s
+
+telegraf_group_inputs:
+  cpu:
+    collect_cpu_time: true
+    percpu: false

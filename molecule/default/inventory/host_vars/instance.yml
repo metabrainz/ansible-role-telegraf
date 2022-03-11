@@ -1,0 +1,19 @@
+---
+telegraf_agent_hostname: ansible_telegraf
+
+telegraf_host_tags:
+  datacentre: example
+
+telegraf_outputs:
+  influxdb:
+    urls:
+      - "http://stats.example.local:8086"
+    database: "telegraf"
+    retention_policy: ""
+    write_consistency: "any"
+    timeout: "5s"
+
+telegraf_host_inputs:
+  cpu:
+    totalcpu: true
+    percpu: true

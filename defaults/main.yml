@@ -1,0 +1,57 @@
+---
+telegraf_service_enabled: true
+telegraf_service_state: started
+telegraf_restart_handler_state: restarted
+
+telegraf_agent_interval: 10s
+telegraf_agent_round_interval: true
+telegraf_agent_metric_batch_size: 1000
+telegraf_agent_metric_buffer_limit: 10000
+telegraf_agent_collection_jitter: 0s
+telegraf_agent_flush_interval: 10s
+telegraf_agent_flush_jitter: 0s
+telegraf_agent_precision: ""
+telegraf_agent_debug: false
+telegraf_agent_quiet: false
+telegraf_agent_hostname: "{{ inventory_hostname }}"
+telegraf_agent_omit_hostname: false
+
+telegraf_inputs:
+  cpu:
+    percpu: true
+    totalcpu: true
+    collect_cpu_time: false
+    report_active: false
+  disk:
+    ignore_fs:
+      - tmpfs
+      - devtmpfs
+      - devfs
+      - iso9660
+      - overlay
+      - aufs
+      - squashfs
+  diskio: {}
+  kernel: {}
+  mem: {}
+  swap: {}
+  system: {}
+telegraf_group_inputs: {}
+telegraf_host_inputs: {}
+
+telegraf_outputs: {}
+#telegraf_outputs:
+#  influxdb:
+#    urls:
+#      - "http://stats.example.org:8086"
+#    database: "telegraf"
+#    retention_policy: ""
+#    write_consistency: "any"
+#    timeout: "5s"
+#    insecure_skip_verify: false
+telegraf_group_outputs: {}
+telegraf_host_outputs: {}
+
+telegraf_tags: {}
+telegraf_group_tags: {}
+telegraf_host_tags: {}

@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: Include metabrainz.telegraf
+      include_role:
+        name: metabrainz.telegraf

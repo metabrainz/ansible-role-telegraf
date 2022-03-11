@@ -1,0 +1,6 @@
+---
+- name: Restart telegraf
+  listen: restart telegraf
+  service:
+    name: telegraf
+    state: "{{ telegraf_restart_handler_state }}"

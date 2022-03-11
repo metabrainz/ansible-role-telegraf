@@ -1,0 +1,71 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ensure Telegraf is installed
+      stat:
+        path: "/usr/bin/telegraf"
+      register: result
+      changed_when: false
+      failed_when: result.stat.isreg is not defined or not result.stat.isreg
+
+    - name: Ensure Telegraf is running
+      service:
+        name: telegraf
+        state: started
+      check_mode: true
+      register: _telegraf_service
+      failed_when: _telegraf_service.changed
+
+    - name: Ensure configuration options are set correctly
+      ini_file: # noqa risky-file-permissions
+        no_extra_spaces: false
+        path: "/etc/telegraf/telegraf.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        state: present
+      loop:
+        # the indented options and quoted values are required so that the formatting
+        # matches that used in the telegraf configuration files
+        - section: global_tags
+          option: "  datacentre"
+          value: '"example"'
+        - section: agent
+          option: "  interval"
+          value: '"30s"'
+        - section: agent
+          option: "  hostname"
+          value: '"ansible_telegraf"'
+        - section: "[outputs.influxdb]"
+          option: "  retention_policy"
+          value: '""'
+        - section: "[outputs.influxdb]"
+          option: "  database"
+          value:  '"telegraf"'
+      check_mode: true
+      register: _telegraf_config
+      failed_when: _telegraf_config.changed
+
+    - name: Ensure input options are set correctly
+      ini_file: # noqa risky-file-permissions
+        no_extra_spaces: false
+        path: "/etc/telegraf/telegraf.d/ansible-inputs.conf"
+        section: "{{ item.section }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        state: present
+      loop:
+        - section: "[inputs.cpu]"
+          option: "  collect_cpu_time"
+          value: "true"
+        - section: "[inputs.cpu]"
+          option: "  percpu"
+          value:  "true"
+        - section: "[inputs.cpu]"
+          option: "  totalcpu"
+          value: "true"
+      check_mode: true
+      register: _telegraf_config
+      failed_when: _telegraf_config.changed

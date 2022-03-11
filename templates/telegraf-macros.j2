@@ -1,0 +1,37 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+
+{% macro telegraf_section(section_config, prefix='output') -%}
+{% for name, config in section_config|dictsort %}
+[[{{ prefix }}.{{ config._name|d(name) }}]]
+{%   for key, value in config|dictsort if key != "_name" %}
+{%     if value is mapping %}
+  [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
+{%       for k, v in value|dictsort if k != "_name" %}
+      {{ k }} = {{ telegraf_format_value(v) -}}
+{%       endfor %}
+{%       if not loop.last %}
+
+{%       endif %}
+{%     else %}
+  {{ key }} = {{ telegraf_format_value(value) -}}
+{%     endif %}
+{%   endfor %}
+
+{% endfor %}
+{% endmacro -%}
+
+{% macro telegraf_format_value(value) -%}
+{% if value is string %}
+"{{ value }}"
+{% elif value is bool %}
+{{ value|lower }}
+{% elif value is list %}
+{%   if value %}
+["{{ value|join('","') }}"]
+{%   else %}
+[]
+{%   endif %}
+{% else %}
+{{ value }}
+{% endif %}
+{% endmacro -%}
