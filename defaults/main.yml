@@ -58,3 +58,7 @@ telegraf_host_outputs: {}
 telegraf_tags: {}
 telegraf_group_tags: {}
 telegraf_host_tags: {}
+
+telegraf_processors: {}
+telegraf_group_processors: {}
+telegraf_host_processors: {}
