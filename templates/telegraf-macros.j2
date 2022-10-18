@@ -8,12 +8,18 @@
   [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
 {%       for k, v in value|dictsort if k != "_name" %}
       {{ k }} = {{ telegraf_format_value(v) -}}
+{%         if v is list %}
+
+{%         endif %}
 {%       endfor %}
 {%       if not loop.last %}
 
 {%       endif %}
 {%     else %}
   {{ key }} = {{ telegraf_format_value(value) -}}
+{%       if value is list %}
+
+{%       endif %}
 {%     endif %}
 {%   endfor %}
 
