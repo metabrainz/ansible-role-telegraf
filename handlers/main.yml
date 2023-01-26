@@ -3,4 +3,4 @@
   listen: restart telegraf
   service:
     name: telegraf
-    state: "{{ telegraf_restart_handler_state }}"
+    state: "{{ telegraf_restart_handler_state }}" # noqa args[module]

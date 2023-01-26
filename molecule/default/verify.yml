@@ -19,7 +19,7 @@
       failed_when: _telegraf_service.changed
 
     - name: Ensure configuration options are set correctly
-      ini_file: # noqa risky-file-permissions
+      community.general.ini_file: # noqa risky-file-permissions
         no_extra_spaces: false
         path: "/etc/telegraf/telegraf.conf"
         section: "{{ item.section }}"
@@ -49,7 +49,7 @@
       failed_when: _telegraf_config.changed
 
     - name: Ensure input options are set correctly
-      ini_file: # noqa risky-file-permissions
+      community.general.ini_file: # noqa risky-file-permissions
         no_extra_spaces: false
         path: "/etc/telegraf/telegraf.d/ansible-inputs.conf"
         section: "{{ item.section }}"
