@@ -5,12 +5,17 @@
     state: present
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version is version('20.04', '>=')
 
+- name: Remove revoked Telegraf repository key
+  file:
+    path: "/etc/apt/trusted.gpg.d/telegraf.gpg"
+    state: absent
+
 - name: Install Telegraf repository key
-  apt_key:
-    id: "05CE15085FC09D18E99EFB22684A14CF2582E0C5"
-    url: "https://repos.influxdata.com/influxdb.key"
-    keyring: "/etc/apt/trusted.gpg.d/telegraf.gpg"
-    state: present
+  get_url:
+    url: "{{ telegraf_signing_key_url }}"
+    checksum: "{{ telegraf_signing_key_checksum | d(omit) }}"
+    dest: "/etc/apt/trusted.gpg.d/telegraf.asc"
+    mode: "0644"
 
 - name: Install Telegraf repository
   apt_repository:
