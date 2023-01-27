@@ -4,3 +4,4 @@
   service:
     name: telegraf
     state: "{{ telegraf_restart_handler_state }}" # noqa args[module]
+  ignore_errors: "{{ ansible_check_mode }}"
