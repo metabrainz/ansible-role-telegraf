@@ -5,3 +5,18 @@ telegraf_group_inputs:
   cpu:
     collect_cpu_time: true
     percpu: false
+
+telegraf_processors:
+  regex:
+    namepass:
+      - "net"
+    tag1:
+      _name: tags
+      key: "interface"
+      pattern: "^enp2s0$"
+      replacement: "eth0"
+    tag2:
+      _name: tags
+      key: "interface"
+      pattern: "^ens1$"
+      replacement: "eth1"

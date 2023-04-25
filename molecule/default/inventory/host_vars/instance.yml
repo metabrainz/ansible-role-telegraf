@@ -17,3 +17,13 @@ telegraf_host_inputs:
   cpu:
     totalcpu: true
     percpu: true
+
+telegraf_host_processors:
+  regex:
+    namepass:
+      - "net"
+    tag1:
+      _name: tags
+      key: "interface"
+      pattern: "^eno1$"
+      replacement: "eth0"
