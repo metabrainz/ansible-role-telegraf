@@ -1,25 +1,33 @@
 ---
-- name: Install required dependencies on Ubuntu >= 20.04
-  apt:
-    name: gnupg
-    state: present
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version is version('20.04', '>=')
-
-- name: Remove revoked Telegraf repository key
+- name: Remove old Telegraf repository keys
   file:
-    path: "/etc/apt/trusted.gpg.d/telegraf.gpg"
+    path: "/etc/apt/trusted.gpg.d/{{ item }}"
     state: absent
+  loop:
+    - telegraf.gpg
+    - telegraf.asc
 
 - name: Install Telegraf repository key
   get_url:
     url: "{{ telegraf_signing_key_url }}"
     checksum: "{{ telegraf_signing_key_checksum | d(omit) }}"
-    dest: "/etc/apt/trusted.gpg.d/telegraf.asc"
+    dest: "{{ telegraf_signing_key_path }}"
     mode: "0644"
+
+- name: Remove old Telegraf repository
+  apt_repository:
+    repo: >-
+      deb https://repos.influxdata.com/{{ ansible_distribution | lower }}
+      {{ ansible_distribution_release }} stable
+    state: absent
 
 - name: Install Telegraf repository
   apt_repository:
-    repo: "deb https://repos.influxdata.com/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+    repo: >-
+      deb [signed-by={{ telegraf_signing_key_path }}]
+      https://repos.influxdata.com/{{ ansible_distribution | lower }}
+      {{ ansible_distribution_release }} stable
+    filename: telegraf
     state: present
     update_cache: yes
 
