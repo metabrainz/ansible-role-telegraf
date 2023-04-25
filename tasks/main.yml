@@ -35,6 +35,7 @@
   apt:
     name: telegraf
     state: present
+    policy_rc_d: 101
   ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Install Telegraf configuration
