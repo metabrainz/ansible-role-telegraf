@@ -40,10 +40,17 @@
     - etc/telegraf/telegraf.d/ansible-processors.conf
   notify: restart telegraf
   vars:
-    _telegraf_outputs: "{{ telegraf_outputs | combine(telegraf_group_outputs, recursive=True) | combine(telegraf_host_outputs, recursive=True) }}"
-    _telegraf_inputs: "{{ telegraf_inputs | combine(telegraf_group_inputs, recursive=True) | combine(telegraf_host_inputs, recursive=True) }}"
-    _telegraf_processors: "{{ telegraf_processors | combine(telegraf_group_processors, recursive=True) | combine(telegraf_host_processors, recursive=True) }}"
-    _telegraf_tags: "{{ telegraf_tags | combine(telegraf_group_tags) | combine(telegraf_host_tags) }}"
+    _telegraf_outputs: >-
+      {{ telegraf_outputs | combine(
+        telegraf_group_outputs, telegraf_host_outputs, recursive=True) }}
+    _telegraf_inputs: >-
+      {{ telegraf_inputs | combine(
+        telegraf_group_inputs, telegraf_host_inputs, recursive=True) }}
+    _telegraf_processors: >-
+      {{ telegraf_processors | combine(
+        telegraf_group_processors, telegraf_host_processors, recursive=True) }}
+    _telegraf_tags: >-
+      {{ telegraf_tags | combine(telegraf_group_tags, telegraf_host_tags) }}
 
 - name: Add telegraf user to required groups
   user:
@@ -57,7 +64,8 @@
     - docker
   notify: restart telegraf
   vars:
-    _telegraf_inputs: "{{ telegraf_inputs | combine(telegraf_group_inputs) | combine(telegraf_host_inputs) }}"
+    _telegraf_inputs: >-
+      {{ telegraf_inputs | combine(telegraf_group_inputs, telegraf_host_inputs) }}
 
 - name: Enable and start Telegraf
   service:
