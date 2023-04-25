@@ -7,7 +7,7 @@
 {%     if value is mapping %}
   [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
 {%       for k, v in value|dictsort if k != "_name" %}
-      {{ k }} = {{ telegraf_format_value(v) -}}
+    {{ k }} = {{ telegraf_format_value(v) -}}
 {%         if v is list %}
 
 {%         endif %}
