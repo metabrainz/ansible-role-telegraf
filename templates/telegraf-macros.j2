@@ -7,37 +7,31 @@
 {%     if value is mapping %}
   [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
 {%       for k, v in value|dictsort if k != "_name" %}
-    {{ k }} = {{ telegraf_format_value(v) -}}
-{%         if v is list %}
-
-{%         endif %}
+    {{ telegraf_format_option(k, v) -}}
 {%       endfor %}
 {%       if not loop.last %}
 
 {%       endif %}
 {%     else %}
-  {{ key }} = {{ telegraf_format_value(value) -}}
-{%       if value is list %}
-
-{%       endif %}
+  {{ telegraf_format_option(key, value) -}}
 {%     endif %}
 {%   endfor %}
 
 {% endfor %}
 {% endmacro -%}
 
-{% macro telegraf_format_value(value) -%}
+{% macro telegraf_format_option(option, value) -%}
 {% if value is string %}
-"{{ value }}"
+{{ option }} = "{{ value }}"
 {% elif value is bool %}
-{{ value | string | lower }}
+{{ option }} = {{ value | string | lower }}
 {% elif value is list %}
 {%   if value %}
-["{{ value | map('string') | join('","') }}"]
+{{ option }} = ["{{ value | map('string') | join('","') }}"]
 {%   else %}
-[]
+{{ option }} = []
 {%   endif %}
 {% else %}
-{{ value | string }}
+{{ option }} = {{ value | string }}
 {% endif %}
 {% endmacro -%}
