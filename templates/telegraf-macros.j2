@@ -30,14 +30,14 @@
 {% if value is string %}
 "{{ value }}"
 {% elif value is bool %}
-{{ value|lower }}
+{{ value | string | lower }}
 {% elif value is list %}
 {%   if value %}
-["{{ value|join('","') }}"]
+["{{ value | map('string') | join('","') }}"]
 {%   else %}
 []
 {%   endif %}
 {% else %}
-{{ value }}
+{{ value | string }}
 {% endif %}
 {% endmacro -%}
