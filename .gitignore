@@ -1,3 +1,4 @@
 .idea
 .tox
+.vscode
 __pycache__
