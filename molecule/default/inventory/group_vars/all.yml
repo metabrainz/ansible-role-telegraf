@@ -20,3 +20,6 @@ telegraf_processors:
       key: "interface"
       pattern: "^ens1$"
       replacement: "eth1"
+
+telegraf_group_sudo_commands:
+  - /usr/bin/cat /foo

@@ -63,3 +63,8 @@ telegraf_host_tags: {}
 telegraf_processors: {}
 telegraf_group_processors: {}
 telegraf_host_processors: {}
+
+telegraf_sudo_commands: []
+telegraf_group_sudo_commands: []
+telegraf_host_sudo_commands: []
+#telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
