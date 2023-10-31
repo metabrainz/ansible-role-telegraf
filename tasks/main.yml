@@ -1,6 +1,6 @@
 ---
 - name: Remove old Telegraf repository keys
-  file:
+  ansible.builtin.file:
     path: "/etc/apt/trusted.gpg.d/{{ item }}"
     state: absent
   loop:
@@ -8,21 +8,21 @@
     - telegraf.asc
 
 - name: Install Telegraf repository key
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ telegraf_signing_key_url }}"
     checksum: "{{ telegraf_signing_key_checksum | d(omit) }}"
     dest: "{{ telegraf_signing_key_path }}"
     mode: "0644"
 
 - name: Remove old Telegraf repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: >-
       deb https://repos.influxdata.com/{{ ansible_distribution | lower }}
       {{ ansible_distribution_release }} stable
     state: absent
 
 - name: Install Telegraf repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: >-
       deb [signed-by={{ telegraf_signing_key_path }}]
       https://repos.influxdata.com/{{ ansible_distribution | lower }}
@@ -32,14 +32,14 @@
     update_cache: yes
 
 - name: Install Telegraf
-  apt:
+  ansible.builtin.apt:
     name: telegraf
     state: present
     policy_rc_d: 101
   ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Install Telegraf configuration
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"
     mode: 0644
@@ -62,7 +62,7 @@
       {{ telegraf_tags | combine(telegraf_group_tags, telegraf_host_tags) }}
 
 - name: Add telegraf user to required groups
-  user:
+  ansible.builtin.user:
     name: telegraf
     groups: "{{ item }}"
     append: true
@@ -77,7 +77,7 @@
       {{ telegraf_inputs | combine(telegraf_group_inputs, telegraf_host_inputs) }}
 
 - name: Install telegraf sudo rules
-  template:
+  ansible.builtin.template:
     src: etc/sudoers.d/ansible-telegraf.j2
     dest: /etc/sudoers.d/ansible-telegraf
     mode: "0640"
@@ -88,7 +88,7 @@
         telegraf_host_sudo_commands }}
 
 - name: Enable and start Telegraf
-  service:
+  ansible.builtin.service:
     name: telegraf
     enabled: "{{ telegraf_service_enabled }}"
     state: "{{ telegraf_service_state }}"

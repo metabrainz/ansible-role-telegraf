@@ -1,3 +1,2 @@
 ---
-skip_list:
-  - fqcn-builtins
+skip_list: []
