@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+{% if _telegraf_sudo_commands %}
+
+Cmnd_Alias TELEGRAF_CMDS = {{ _telegraf_sudo_commands | join(', ') }}
+{% if telegraf_sudo_defaults | d() %}
+Defaults!TELEGRAF_CMDS {{ telegraf_sudo_defaults }}
+{% endif %}
+{{ telegraf_user }} ALL=(ALL) NOPASSWD: TELEGRAF_CMDS
+{% endif %}

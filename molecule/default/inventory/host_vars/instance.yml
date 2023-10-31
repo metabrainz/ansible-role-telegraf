@@ -27,3 +27,7 @@ telegraf_host_processors:
       key: "interface"
       pattern: "^eno1$"
       replacement: "eth0"
+
+telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
+telegraf_sudo_commands:
+  - /usr/bin/ls /

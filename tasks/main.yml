@@ -76,6 +76,17 @@
     _telegraf_inputs: >-
       {{ telegraf_inputs | combine(telegraf_group_inputs, telegraf_host_inputs) }}
 
+- name: Install telegraf sudo rules
+  template:
+    src: etc/sudoers.d/ansible-telegraf.j2
+    dest: /etc/sudoers.d/ansible-telegraf
+    mode: "0640"
+    validate: visudo -c -f %s
+  vars:
+    _telegraf_sudo_commands: >-
+      {{ telegraf_sudo_commands + telegraf_group_sudo_commands +
+        telegraf_host_sudo_commands }}
+
 - name: Enable and start Telegraf
   service:
     name: telegraf
