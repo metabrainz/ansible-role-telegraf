@@ -51,6 +51,7 @@ jobs:
           - 7
         distro:
           - ubuntu2004
+          - ubuntu2204
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
