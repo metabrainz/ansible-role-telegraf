@@ -1,0 +1,3 @@
+# {{ ansible_managed }}
+
+TELEGRAF_OPTS={{ _telegraf_plugin_filters | to_telegraf_plugin_filter_args | quote }}

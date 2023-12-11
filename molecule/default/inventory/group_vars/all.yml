@@ -23,3 +23,13 @@ telegraf_processors:
 
 telegraf_group_sudo_commands:
   - /usr/bin/cat /foo
+
+telegraf_plugin_filters:
+  input:
+    cpu: true
+    disk: true
+    diskio: true
+    kernel: true
+    mem: true
+    swap: true
+    system: true

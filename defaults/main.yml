@@ -20,6 +20,10 @@ telegraf_agent_quiet: false
 telegraf_agent_hostname: "{{ inventory_hostname }}"
 telegraf_agent_omit_hostname: false
 
+telegraf_tags: {}
+telegraf_group_tags: {}
+telegraf_host_tags: {}
+
 telegraf_inputs:
   cpu:
     percpu: true
@@ -56,10 +60,6 @@ telegraf_outputs: {}
 telegraf_group_outputs: {}
 telegraf_host_outputs: {}
 
-telegraf_tags: {}
-telegraf_group_tags: {}
-telegraf_host_tags: {}
-
 telegraf_processors: {}
 telegraf_group_processors: {}
 telegraf_host_processors: {}
@@ -68,3 +68,11 @@ telegraf_sudo_commands: []
 telegraf_group_sudo_commands: []
 telegraf_host_sudo_commands: []
 #telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
+
+telegraf_plugin_filters: {}
+#telegraf_plugin_filters:
+#  inputs:
+#    cpu: true
+#    docker: "{{ inventory_hostname in groups['docker_servers'] }}"
+telegraf_group_plugin_filters: {}
+telegraf_host_plugin_filters: {}

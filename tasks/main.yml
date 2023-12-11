@@ -47,6 +47,7 @@
     - etc/telegraf/telegraf.conf
     - etc/telegraf/telegraf.d/ansible-inputs.conf
     - etc/telegraf/telegraf.d/ansible-processors.conf
+    - etc/default/telegraf
   notify: restart telegraf
   vars:
     _telegraf_outputs: >-
@@ -60,6 +61,10 @@
         telegraf_group_processors, telegraf_host_processors, recursive=True) }}
     _telegraf_tags: >-
       {{ telegraf_tags | combine(telegraf_group_tags, telegraf_host_tags) }}
+    _telegraf_plugin_filters: >-
+      {{ telegraf_plugin_filters | combine(
+        telegraf_group_plugin_filters, telegraf_host_plugin_filters,
+        recursive=True) }}
 
 - name: Add telegraf user to required groups
   ansible.builtin.user:
