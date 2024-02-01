@@ -5,6 +5,11 @@ telegraf_group_inputs:
   cpu:
     collect_cpu_time: true
     percpu: false
+  filestat:
+    files:
+      - "/var/log/**.log"
+  processes:
+    _enabled: "{{ inventory_hostname == 'instance' }}"
 
 telegraf_processors:
   regex:

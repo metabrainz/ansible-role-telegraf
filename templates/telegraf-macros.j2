@@ -1,9 +1,9 @@
 #jinja2: trim_blocks: True, lstrip_blocks: True
 
 {% macro telegraf_section(section_config, prefix='output') -%}
-{% for name, config in section_config|dictsort %}
+{% for name, config in section_config|dictsort if config._enabled|d(True)|bool %}
 [[{{ prefix }}.{{ config._name|d(name) }}]]
-{%   for key, value in config|dictsort if key != "_name" %}
+{%   for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
 {%     if value is mapping %}
   [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
 {%       for k, v in value|dictsort if k != "_name" %}

@@ -17,6 +17,8 @@ telegraf_host_inputs:
   cpu:
     totalcpu: true
     percpu: true
+  filestat:
+    _enabled: "{{ inventory_hostname != 'instance' }}"
 
 telegraf_host_processors:
   regex:
