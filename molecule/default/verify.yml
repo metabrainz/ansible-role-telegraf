@@ -18,6 +18,15 @@
       register: result
       failed_when: result is changed
 
+    - name: Retrieve telegraf user groups
+      ansible.builtin.getent:
+        database: group
+        key: haproxy
+
+    - name: Check telegraf user is a member of the haproxy group
+      ansible.builtin.fail:
+      when: '"telegraf" not in ansible_facts.getent_group.haproxy'
+
     - name: Ensure Telegraf configuration files are correct
       ansible.builtin.copy:
         src: "{{ item | basename }}"

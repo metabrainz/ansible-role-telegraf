@@ -68,9 +68,12 @@
     append: true
   # groups may not exist yet ¯\_(ツ)_/¯
   ignore_errors: true # noqa ignore-errors
-  when: item in _telegraf_inputs
+  when:
+    - item in _telegraf_inputs
+    - _telegraf_inputs[item]._enabled | d(True)
   loop:
     - docker
+    - haproxy
   notify: restart telegraf
   vars:
     _telegraf_inputs: >-
