@@ -2,7 +2,8 @@
 - name: Prepare
   hosts: all
   tasks:
-    - name: Update apt cache
+    - name: Update apt cache and install HAProxy
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 600
+        name: haproxy

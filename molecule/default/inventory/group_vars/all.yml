@@ -8,6 +8,9 @@ telegraf_group_inputs:
   filestat:
     files:
       - "/var/log/**.log"
+  haproxy:
+    servers:
+      - "/run/haproxy/admin.sock"
   processes:
     _enabled: "{{ inventory_hostname == 'instance' }}"
 
