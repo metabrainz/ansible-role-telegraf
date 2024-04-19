@@ -23,7 +23,7 @@
 {% macro telegraf_format_option(option, value) -%}
 {% if value is string %}
 {{ option }} = "{{ value }}"
-{% elif value is bool %}
+{% elif value is boolean %}
 {{ option }} = {{ value | string | lower }}
 {% elif value is list %}
 {%   if value %}
