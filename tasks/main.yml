@@ -42,7 +42,7 @@
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/{{ item }}"
-    mode: 0644
+    mode: "0644"
   with_items:
     - etc/telegraf/telegraf.conf
     - etc/telegraf/telegraf.d/ansible-inputs.conf

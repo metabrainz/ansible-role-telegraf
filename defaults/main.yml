@@ -44,15 +44,15 @@ telegraf_group_inputs: {}
 telegraf_host_inputs: {}
 
 telegraf_outputs: {}
-#telegraf_outputs:
-#  influxdb:
-#    urls:
-#      - "http://stats.example.org:8086"
-#    database: "telegraf"
-#    retention_policy: ""
-#    write_consistency: "any"
-#    timeout: "5s"
-#    insecure_skip_verify: false
+# telegraf_outputs:
+#   influxdb:
+#     urls:
+#       - "http://stats.example.org:8086"
+#     database: "telegraf"
+#     retention_policy: ""
+#     write_consistency: "any"
+#     timeout: "5s"
+#     insecure_skip_verify: false
 telegraf_group_outputs: {}
 telegraf_host_outputs: {}
 
@@ -67,4 +67,4 @@ telegraf_host_processors: {}
 telegraf_sudo_commands: []
 telegraf_group_sudo_commands: []
 telegraf_host_sudo_commands: []
-#telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
+# telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
