@@ -1,13 +1,15 @@
 ---
 - name: Remove old Telegraf repository keys
   ansible.builtin.file:
-    path: "/etc/apt/trusted.gpg.d/{{ item }}"
+    path: "{{ item }}"
     state: absent
   loop:
-    - telegraf.gpg
-    - telegraf.asc
+    - /etc/apt/trusted.gpg.d/telegraf.gpg
+    - /etc/apt/trusted.gpg.d/telegraf.asc
+    - /usr/share/keyrings/telegraf.asc
+  when: item != telegraf_signing_key_path
 
-- name: Install Telegraf repository key
+- name: Install Influx Data repository key
   ansible.builtin.get_url:
     url: "{{ telegraf_signing_key_url }}"
     checksum: "{{ telegraf_signing_key_checksum | d(omit) }}"
@@ -15,21 +17,17 @@
     mode: "0644"
 
 - name: Remove old Telegraf repository
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb https://repos.influxdata.com/{{ ansible_distribution | lower }}
-      {{ ansible_distribution_release }} stable
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/telegraf.list
     state: absent
 
-- name: Install Telegraf repository
+- name: Install Influx Data repository
   ansible.builtin.apt_repository:
     repo: >-
       deb [signed-by={{ telegraf_signing_key_path }}]
-      https://repos.influxdata.com/{{ ansible_distribution | lower }}
-      {{ ansible_distribution_release }} stable
-    filename: telegraf
+      https://repos.influxdata.com/debian stable main
+    filename: influxdata
     state: present
-    update_cache: yes
 
 - name: Install Telegraf
   ansible.builtin.apt:
