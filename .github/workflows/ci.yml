@@ -23,7 +23,7 @@ jobs:
           path: metabrainz.telegraf
 
       - name: Set up Python 3
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -60,7 +60,7 @@ jobs:
           path: metabrainz.telegraf
 
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
 
@@ -68,10 +68,9 @@ jobs:
         run: |
           cat <<EOF > test-requirements.txt
           ansible==${{ matrix.ansible }}.*
-          docker
+          docker>=7.0.0
           molecule-plugins[docker]
-          # https://github.com/docker/docker-py/issues/3256
-          requests==2.31.0
+          urllib3>=2.0
           EOF
           echo "REQS_HASH=$(sha256sum test-requirements.txt | awk '{ print $1 }')" >> "$GITHUB_ENV"
 
