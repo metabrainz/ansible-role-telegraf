@@ -22,6 +22,11 @@
 
 {% macro telegraf_render_options(config, section_prefix, indent_level=1) -%}
 {% for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
+{%   if not (value is list and value and value[0] is mapping) and not (value is mapping) %}
+{{ '  ' * indent_level }}{{ telegraf_format_option(key, value) -}}
+{%   endif %}
+{% endfor %}
+{% for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
 {%   if value is list and value and value[0] is mapping %}
 {%     for item in value %}
 {{ telegraf_render_nested(item, section_prefix, key, indent_level) }}
@@ -31,8 +36,6 @@
 {%     endfor %}
 {%   elif value is mapping %}
 {{ telegraf_render_nested(value, section_prefix, key, indent_level) }}
-{%   else %}
-{{ '  ' * indent_level }}{{ telegraf_format_option(key, value) -}}
 {%   endif %}
 {% endfor %}
 {% endmacro -%}
