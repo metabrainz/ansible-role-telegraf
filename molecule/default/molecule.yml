@@ -16,6 +16,9 @@ provisioner:
   name: ansible
   env:
     ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:${ANSIBLE_ROLES_PATH:-~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles}
+  config_options:
+    defaults:
+      ansible_managed: Ansible managed
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   inventory:
