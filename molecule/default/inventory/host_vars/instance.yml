@@ -29,17 +29,6 @@ telegraf_host_processors:
       key: "interface"
       pattern: "^eno1$"
       replacement: "eth0"
-  # Test 3-level nesting
-  test_processor:
-    level1:
-      _name: nested1
-      option1: "value1"
-      level2:
-        _name: nested2
-        option2: "value2"
-        level3:
-          _name: nested3
-          option3: "value3"
 
 telegraf_sudo_defaults: "!logfile, !syslog, !pam_session"
 telegraf_sudo_commands:
