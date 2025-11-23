@@ -39,12 +39,12 @@
 
 {% macro telegraf_render_nested(nested_config, parent_prefix, key) -%}
 
-  [[{{ parent_prefix }}.{{ nested_config._name|d(key) }}]]
+{{ '  ' }}[[{{ parent_prefix }}.{{ nested_config._name|d(key) }}]]
 {% for k, v in nested_config|dictsort if k not in ['_name', '_enabled'] %}
 {%   if v is mapping %}
-{{ telegraf_render_nested(v, parent_prefix ~ '.' ~ nested_config._name|d(key), k) -}}
+{{ telegraf_render_nested(v, parent_prefix ~ '.' ~ nested_config._name|d(key), k) }}
 {%   else %}
-    {{ telegraf_format_option(k, v) -}}
+{{ '    ' }}{{ telegraf_format_option(k, v) -}}
 {%   endif %}
 {% endfor %}
 {% endmacro -%}
