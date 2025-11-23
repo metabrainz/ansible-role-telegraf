@@ -13,6 +13,13 @@ telegraf_group_inputs:
       - "/run/haproxy/admin.sock"
   processes:
     _enabled: "{{ inventory_hostname == 'instance' }}"
+  postgresql:
+    - address: "host=db1.example.com port=5432"
+      databases:
+        - "app_db"
+    - address: "host=db2.example.com port=5432"
+      databases:
+        - "metrics_db"
 
 telegraf_processors:
   regex:
