@@ -1,4 +1,5 @@
 ---
+telegraf_version: "1.36.3-1"
 telegraf_agent_interval: 30s
 
 telegraf_group_inputs:
@@ -11,14 +12,6 @@ telegraf_group_inputs:
   haproxy:
     servers:
       - "/run/haproxy/admin.sock"
-  http:
-    - data_format: "json_v2"
-      name_override: "api_status"
-      tagexclude:
-        - "host"
-      urls:
-        - "https://api.example.com/status"
-        - "https://api2.example.com/status"
   processes:
     _enabled: "{{ inventory_hostname == 'instance' }}"
   postgresql:
