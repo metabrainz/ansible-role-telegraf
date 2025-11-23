@@ -4,4 +4,4 @@
   tasks:
     - name: Include metabrainz.telegraf
       ansible.builtin.include_role:
-        name: metabrainz.telegraf
+        name: "{{ playbook_dir | dirname | dirname | basename }}"
