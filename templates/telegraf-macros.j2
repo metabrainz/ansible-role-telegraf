@@ -5,37 +5,39 @@
 {%   if config is list %}
 {%     for item in config if item._enabled|d(True)|bool %}
 [[{{ prefix }}.{{ item._name|d(name) }}]]
-{%       for key, value in item|dictsort if key not in ['_name', '_enabled'] %}
-{%         if value is mapping %}
-  [[{{ prefix }}.{{ item._name|d(name) }}.{{ value._name|d(key) }}]]
-{%           for k, v in value|dictsort if k != "_name" %}
-    {{ telegraf_format_option(k, v) -}}
-{%           endfor %}
-{%           if not loop.last %}
+{{ telegraf_render_options(item, prefix ~ '.' ~ item._name|d(name)) -}}
+{%       if not loop.last %}
 
-{%           endif %}
-{%         else %}
-  {{ telegraf_format_option(key, value) -}}
-{%         endif %}
-{%       endfor %}
-
+{%       endif %}
 {%     endfor %}
 {%   elif config._enabled|d(True)|bool %}
 [[{{ prefix }}.{{ config._name|d(name) }}]]
-{%     for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
-{%       if value is mapping %}
-  [[{{ prefix }}.{{ config._name|d(name) }}.{{ value._name|d(key) }}]]
-{%         for k, v in value|dictsort if k != "_name" %}
-    {{ telegraf_format_option(k, v) -}}
-{%         endfor %}
-{%         if not loop.last %}
+{{ telegraf_render_options(config, prefix ~ '.' ~ config._name|d(name)) -}}
+{%   endif %}
+{%   if not loop.last %}
 
-{%         endif %}
-{%       else %}
+{%   endif %}
+{% endfor %}
+{% endmacro -%}
+
+{% macro telegraf_render_options(config, section_prefix) -%}
+{% for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
+{%   if value is mapping %}
+{{ telegraf_render_nested(value, section_prefix, key) -}}
+{%   else %}
   {{ telegraf_format_option(key, value) -}}
-{%       endif %}
-{%     endfor %}
+{%   endif %}
+{% endfor %}
+{% endmacro -%}
 
+{% macro telegraf_render_nested(nested_config, parent_prefix, key) -%}
+
+  [[{{ parent_prefix }}.{{ nested_config._name|d(key) }}]]
+{% for k, v in nested_config|dictsort if k not in ['_name', '_enabled'] %}
+{%   if v is mapping %}
+{{ telegraf_render_nested(v, parent_prefix ~ '.' ~ nested_config._name|d(key), k) -}}
+{%   else %}
+    {{ telegraf_format_option(k, v) -}}
 {%   endif %}
 {% endfor %}
 {% endmacro -%}
