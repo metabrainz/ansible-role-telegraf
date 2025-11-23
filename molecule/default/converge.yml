@@ -2,6 +2,6 @@
 - name: Converge
   hosts: all
   tasks:
-    - name: Include metabrainz.telegraf
-      ansible.builtin.include_role:
+    - name: Include role
+      include_role:
         name: "{{ playbook_dir | dirname | dirname | basename }}"

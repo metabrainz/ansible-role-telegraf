@@ -14,7 +14,8 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
-  role_name: metabrainz.telegraf
+  env:
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:${ANSIBLE_ROLES_PATH:-~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles}
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   inventory:
