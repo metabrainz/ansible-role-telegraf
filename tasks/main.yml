@@ -31,7 +31,7 @@
 
 - name: Install Telegraf
   ansible.builtin.apt:
-    name: telegraf
+    name: "telegraf{% if telegraf_version is defined %}={{ telegraf_version }}{% endif %}"
     state: present
     policy_rc_d: 101
   ignore_errors: "{{ ansible_check_mode }}"
@@ -87,6 +87,20 @@
     _telegraf_sudo_commands: >-
       {{ telegraf_sudo_commands + telegraf_group_sudo_commands +
         telegraf_host_sudo_commands }}
+
+- name: Validate Telegraf configuration
+  ansible.builtin.command: telegraf --test --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d
+  changed_when: false
+  register: telegraf_test
+  failed_when:
+    - telegraf_test.rc != 0
+    - "'error parsing' in telegraf_test.stderr or 'Error loading config' in telegraf_test.stderr"
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Show Telegraf validation output on failure
+  ansible.builtin.debug:
+    var: telegraf_test
+  when: telegraf_test.rc != 0
 
 - name: Enable and start Telegraf
   ansible.builtin.service:
