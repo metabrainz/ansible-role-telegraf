@@ -96,6 +96,16 @@ telegraf_host_inputs:
 
 The role merges `telegraf_group_*` and `telegraf_host_*` variables, with host variables taking precedence.
 
+### Version Pinning
+
+To install a specific version of Telegraf, set the `telegraf_version` variable:
+
+```yaml
+telegraf_version: "1.36.3-1"
+```
+
+If not set, the latest available version will be installed.
+
 ## Testing
 
 ### Prerequisites
