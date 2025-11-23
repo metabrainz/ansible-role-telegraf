@@ -14,6 +14,7 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  role_name: metabrainz.telegraf
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   inventory:
