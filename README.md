@@ -1,5 +1,101 @@
 # Ansible Role: Telegraf
 
+Ansible role for installing and configuring Telegraf, the plugin-driven server agent for collecting and sending metrics.
+
+## Usage
+
+### Basic Configuration
+
+Define Telegraf configuration using Ansible variables. The role supports inputs, outputs, processors, and aggregators.
+
+#### Simple Example
+
+Telegraf config:
+```toml
+[[inputs.cpu]]
+  percpu = false
+  totalcpu = true
+```
+
+Ansible equivalent:
+```yaml
+telegraf_group_inputs:
+  cpu:
+    percpu: false
+    totalcpu: true
+```
+
+#### Repeated Sections
+
+Telegraf config:
+```toml
+[[inputs.postgresql]]
+  address = "host=db1.example.com user=telegraf database=postgres"
+
+[[inputs.postgresql]]
+  address = "host=db2.example.com user=telegraf database=postgres"
+```
+
+Ansible equivalent:
+```yaml
+telegraf_group_inputs:
+  postgresql:
+    - address: "host=db1.example.com user=telegraf database=postgres"
+    - address: "host=db2.example.com user=telegraf database=postgres"
+```
+
+#### Nested Sections
+
+Telegraf config:
+```toml
+[[inputs.http]]
+  urls = ["http://api.example.com/metrics"]
+
+  [inputs.http.json_v2]
+    measurement_name = "api_metrics"
+
+    [[inputs.http.json_v2.object]]
+      path = "data"
+      tags = ["environment"]
+```
+
+Ansible equivalent:
+```yaml
+telegraf_group_inputs:
+  http:
+    urls:
+      - "http://api.example.com/metrics"
+    json_v2:
+      measurement_name: "api_metrics"
+      object:
+        - path: "data"
+          tags:
+            - "environment"
+```
+
+### Group and Host Variables
+
+Use Ansible's variable precedence to override configurations:
+
+```yaml
+# group_vars/all.yml - applies to all hosts
+telegraf_group_inputs:
+  cpu:
+    percpu: false
+
+# group_vars/webservers.yml - applies to webservers group
+telegraf_group_inputs:
+  nginx:
+    urls: ["http://localhost/status"]
+
+# host_vars/web01.yml - applies to specific host
+telegraf_host_inputs:
+  disk:
+    mount_points: ["/", "/data"]
+```
+
+The role merges `telegraf_group_*` and `telegraf_host_*` variables, with host variables taking precedence.
+
 ## Testing
 
 ### Prerequisites
