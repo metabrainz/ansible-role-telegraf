@@ -22,7 +22,14 @@
 
 {% macro telegraf_render_options(config, section_prefix) -%}
 {% for key, value in config|dictsort if key not in ['_name', '_enabled'] %}
-{%   if value is mapping %}
+{%   if value is list %}
+{%     for item in value %}
+{{ telegraf_render_nested(item, section_prefix, key) -}}
+{%       if not loop.last %}
+
+{%       endif %}
+{%     endfor %}
+{%   elif value is mapping %}
 {{ telegraf_render_nested(value, section_prefix, key) -}}
 {%   else %}
   {{ telegraf_format_option(key, value) -}}
