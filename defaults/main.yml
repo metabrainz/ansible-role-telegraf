@@ -1,7 +1,7 @@
 ---
 telegraf_signing_key_url: "https://repos.influxdata.com/influxdata-archive.key"
-telegraf_signing_key_checksum: "sha256:943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515"
-telegraf_signing_key_path: /usr/share/keyrings/influxdata-archive.asc
+telegraf_signing_key_checksum: "sha256:40557e261cdbdccac91a2dde474cbf101ef672661e64b211b711cc0b904d5dac"
+telegraf_signing_key_path: /usr/share/keyrings/influxdata-archive.gpg
 
 telegraf_service_enabled: true
 telegraf_service_state: started

@@ -1,33 +1,36 @@
 ---
-- name: Remove old Telegraf repository keys
+- name: Remove all possible conflicting repository files and keys
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
-    - /etc/apt/trusted.gpg.d/telegraf.gpg
-    - /etc/apt/trusted.gpg.d/telegraf.asc
-    - /usr/share/keyrings/telegraf.asc
-  when: item != telegraf_signing_key_path
+    - /etc/apt/sources.list.d/telegraf.list          # Old repo file
+    - /etc/apt/sources.list.d/influxdata.list        # The file causing the current conflict
+    - /etc/apt/trusted.gpg.d/telegraf.gpg            # Legacy key
+    - /etc/apt/trusted.gpg.d/telegraf.asc            # Legacy key
+    - /usr/share/keyrings/telegraf.asc               # Legacy key
+    - /usr/share/keyrings/influxdata-archive.gpg     # The GPG version causing the mismatch
+    - /usr/share/keyrings/influxdata-archive.asc     # ASC version
 
 - name: Install Influx Data repository key
-  ansible.builtin.get_url:
-    url: "{{ telegraf_signing_key_url }}"
-    checksum: "{{ telegraf_signing_key_checksum | d(omit) }}"
-    dest: "{{ telegraf_signing_key_path }}"
-    mode: "0644"
+  ansible.builtin.shell: |
+    wget -qO- "{{ telegraf_signing_key_url }}" | gpg --dearmor -o "{{ telegraf_signing_key_path }}"
+  args:
+    creates: "{{ telegraf_signing_key_path }}"
 
-- name: Remove old Telegraf repository
+- name: Set correct permissions on GPG key
   ansible.builtin.file:
-    path: /etc/apt/sources.list.d/telegraf.list
-    state: absent
+    path: "{{ telegraf_signing_key_path }}"
+    mode: "0644"
+    owner: root
+    group: root
 
 - name: Install Influx Data repository
   ansible.builtin.apt_repository:
-    repo: >-
-      deb [signed-by={{ telegraf_signing_key_path }}]
-      https://repos.influxdata.com/debian stable main
+    repo: "deb [signed-by={{ telegraf_signing_key_path }}] https://repos.influxdata.com/debian stable main"
     filename: influxdata
     state: present
+    update_cache: yes
 
 - name: Install Telegraf
   ansible.builtin.apt:
