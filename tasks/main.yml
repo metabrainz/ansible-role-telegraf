@@ -1,21 +1,27 @@
 ---
-- name: Remove all possible conflicting repository files and keys
+- name: Remove legacy/conflicting repository files and keys
+  # Only removes *legacy* artefacts from older key/repo layouts. The current
+  # repo file (influxdata) and key ({{ telegraf_signing_key_path }}) are managed
+  # idempotently by the download/dearmor/apt_repository tasks below, so they must
+  # NOT be listed here (doing so re-deletes+recreates them on every run).
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /etc/apt/sources.list.d/telegraf.list          # Old repo file
-    - /etc/apt/sources.list.d/influxdata.list        # The file causing the current conflict
     - /etc/apt/trusted.gpg.d/telegraf.gpg            # Legacy key
     - /etc/apt/trusted.gpg.d/telegraf.asc            # Legacy key
     - /usr/share/keyrings/telegraf.asc               # Legacy key
-    - /usr/share/keyrings/influxdata-archive.gpg     # The GPG version causing the mismatch
-    - /usr/share/keyrings/influxdata-archive.asc     # ASC version
 
-- name: Install Influx Data repository key
-  ansible.builtin.shell: |
-    wget -qO- "{{ telegraf_signing_key_url }}" | gpg --dearmor -o "{{ telegraf_signing_key_path }}"
-  args:
+- name: Download Influx Data repository key
+  ansible.builtin.get_url:
+    url: "{{ telegraf_signing_key_url }}"
+    dest: "{{ telegraf_signing_key_path }}.asc"
+    mode: "0644"
+
+- name: Dearmor Influx Data repository key
+  ansible.builtin.command:
+    cmd: "gpg --batch --yes --dearmor -o {{ telegraf_signing_key_path }} {{ telegraf_signing_key_path }}.asc"
     creates: "{{ telegraf_signing_key_path }}"
 
 - name: Set correct permissions on GPG key
@@ -50,17 +56,10 @@
     - etc/telegraf/telegraf.d/ansible-processors.conf
   notify: restart telegraf
   vars:
-    _telegraf_outputs: >-
-      {{ telegraf_outputs | combine(
-        telegraf_group_outputs, telegraf_host_outputs, recursive=True) }}
-    _telegraf_inputs: >-
-      {{ telegraf_inputs | combine(
-        telegraf_group_inputs, telegraf_host_inputs, recursive=True) }}
-    _telegraf_processors: >-
-      {{ telegraf_processors | combine(
-        telegraf_group_processors, telegraf_host_processors, recursive=True) }}
-    _telegraf_tags: >-
-      {{ telegraf_tags | combine(telegraf_group_tags, telegraf_host_tags) }}
+    _telegraf_outputs: "{{ _telegraf_outputs_merged }}"
+    _telegraf_inputs: "{{ _telegraf_inputs_merged }}"
+    _telegraf_processors: "{{ _telegraf_processors_merged }}"
+    _telegraf_tags: "{{ _telegraf_tags_merged }}"
 
 - name: Add telegraf user to required groups
   ansible.builtin.user:
@@ -77,8 +76,7 @@
     - haproxy
   notify: restart telegraf
   vars:
-    _telegraf_inputs: >-
-      {{ telegraf_inputs | combine(telegraf_group_inputs, telegraf_host_inputs) }}
+    _telegraf_inputs: "{{ _telegraf_inputs_merged }}"
 
 - name: Install telegraf sudo rules
   ansible.builtin.template:
@@ -87,9 +85,7 @@
     mode: "0640"
     validate: visudo -c -f %s
   vars:
-    _telegraf_sudo_commands: >-
-      {{ telegraf_sudo_commands + telegraf_group_sudo_commands +
-        telegraf_host_sudo_commands }}
+    _telegraf_sudo_commands: "{{ _telegraf_sudo_commands_merged }}"
 
 - name: Validate Telegraf configuration
   ansible.builtin.command: telegraf --test --config /etc/telegraf/telegraf.conf --config-directory /etc/telegraf/telegraf.d

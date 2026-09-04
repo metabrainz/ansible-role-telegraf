@@ -96,6 +96,31 @@ telegraf_host_inputs:
 
 The role merges `telegraf_group_*` and `telegraf_host_*` variables, with host variables taking precedence.
 
+#### Hosts in multiple groups
+
+A single `telegraf_group_inputs` (or `_outputs`/`_processors`/`_tags`/`_sudo_commands`) is resolved by
+Ansible from only **one** group per host, so a host belonging to two groups that each define it would
+silently lose one group's config. To contribute config from **every** group a host is in, use a
+per-group variable suffixed with the group name:
+
+```yaml
+# group_vars/gw_servers.yml
+telegraf_group_inputs__gw_servers:
+  haproxy:
+    servers: ["/run/haproxy/*.sock"]
+
+# group_vars/consul_agents.yml
+telegraf_group_inputs__consul_agents:
+  consul:
+    address: "127.0.0.1:8500"
+```
+
+A host in both `gw_servers` and `consul_agents` then gets **both** the `haproxy` and `consul` inputs.
+The role folds `telegraf_group_<section>__<group>` across all of the host's groups. The legacy single
+`telegraf_group_<section>` variable is still honoured (merged first), so existing inventories keep
+working. Precedence (last wins): base defaults → `telegraf_group_<section>` → per-group
+`telegraf_group_<section>__<group>` → `telegraf_host_<section>`.
+
 ### Version Pinning
 
 To install a specific version of Telegraf, set the `telegraf_version` variable:
