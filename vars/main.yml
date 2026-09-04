@@ -1,2 +1,56 @@
 ---
 telegraf_user: telegraf
+
+# --- Multi-group section merge -------------------------------------------------
+#
+# Ansible resolves a single `telegraf_group_<section>` var from only ONE group per
+# host (hash-replace, not merge), so a host in two groups that both set it silently
+# loses one group's config. To support multi-group hosts, a group may instead
+# define a per-group variable:
+#     telegraf_group_<section>__<group_name>
+#     e.g.  telegraf_group_inputs__gw_servers, telegraf_group_inputs__consul_agents
+# The role folds these across ALL of the host's group_names. The legacy single
+# `telegraf_group_<section>` vars are still merged first, so existing inventories
+# keep working. Precedence (last wins): base -> legacy group -> per-group -> host.
+#
+# Note: the per-group list is wrapped as [legacy] + <per-group> + [host] before
+# splatting into combine(), so the argument list is never empty (combine(*[]) is a
+# Jinja syntax error).
+
+# Per-group override dicts contributed by every group this host belongs to.
+_telegraf_pg_inputs: >-
+  {{ group_names | map('regex_replace', '^(.+)$', 'telegraf_group_inputs__\1')
+     | map('extract', hostvars[inventory_hostname]) | select('defined') | list }}
+_telegraf_pg_outputs: >-
+  {{ group_names | map('regex_replace', '^(.+)$', 'telegraf_group_outputs__\1')
+     | map('extract', hostvars[inventory_hostname]) | select('defined') | list }}
+_telegraf_pg_processors: >-
+  {{ group_names | map('regex_replace', '^(.+)$', 'telegraf_group_processors__\1')
+     | map('extract', hostvars[inventory_hostname]) | select('defined') | list }}
+_telegraf_pg_tags: >-
+  {{ group_names | map('regex_replace', '^(.+)$', 'telegraf_group_tags__\1')
+     | map('extract', hostvars[inventory_hostname]) | select('defined') | list }}
+_telegraf_pg_sudo_commands: >-
+  {{ group_names | map('regex_replace', '^(.+)$', 'telegraf_group_sudo_commands__\1')
+     | map('extract', hostvars[inventory_hostname]) | select('defined') | list }}
+
+# Merged results consumed by tasks/main.yml (dict sections: recursive combine;
+# sudo_commands: list concatenation).
+_telegraf_inputs_merged: >-
+  {{ telegraf_inputs
+     | combine(*([telegraf_group_inputs] + _telegraf_pg_inputs + [telegraf_host_inputs]),
+               recursive=True) }}
+_telegraf_outputs_merged: >-
+  {{ telegraf_outputs
+     | combine(*([telegraf_group_outputs] + _telegraf_pg_outputs + [telegraf_host_outputs]),
+               recursive=True) }}
+_telegraf_processors_merged: >-
+  {{ telegraf_processors
+     | combine(*([telegraf_group_processors] + _telegraf_pg_processors + [telegraf_host_processors]),
+               recursive=True) }}
+_telegraf_tags_merged: >-
+  {{ telegraf_tags
+     | combine(*([telegraf_group_tags] + _telegraf_pg_tags + [telegraf_host_tags])) }}
+_telegraf_sudo_commands_merged: >-
+  {{ telegraf_sudo_commands + telegraf_group_sudo_commands
+     + (_telegraf_pg_sudo_commands | sum(start=[])) + telegraf_host_sudo_commands }}
