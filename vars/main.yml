@@ -54,3 +54,46 @@ _telegraf_tags_merged: >-
 _telegraf_sudo_commands_merged: >-
   {{ telegraf_sudo_commands + telegraf_group_sudo_commands
      + (_telegraf_pg_sudo_commands | sum(start=[])) + telegraf_host_sudo_commands }}
+
+# --- Collision detection -------------------------------------------------------
+#
+# The plain `telegraf_group_<section>` var cannot be merged across groups by
+# Ansible: if two of a host's groups both set it, one is silently dropped BEFORE
+# this role runs, so the loss is not detectable at runtime. What IS detectable is
+# the *mixed* usage that signals the risk: a host has a non-empty plain
+# `telegraf_group_<section>` AND at least one per-group `telegraf_group_<section>__<group>`
+# for the same section. That means more than one source is contributing to that
+# section on this host, and the plain one is exactly the fragile part (its
+# defining group may have lost the hash-replace race). We fail with a hint to
+# migrate the plain var to the per-group `__<group>` suffix.
+#
+# Sections checked (dict sections only; sudo_commands is list-concatenated and
+# never collides).
+_telegraf_collision_sections:
+  inputs: >-
+    {{ ((telegraf_group_inputs | default({}) | length > 0)
+       and (_telegraf_pg_inputs | length > 0)) | bool }}
+  outputs: >-
+    {{ ((telegraf_group_outputs | default({}) | length > 0)
+       and (_telegraf_pg_outputs | length > 0)) | bool }}
+  processors: >-
+    {{ ((telegraf_group_processors | default({}) | length > 0)
+       and (_telegraf_pg_processors | length > 0)) | bool }}
+  tags: >-
+    {{ ((telegraf_group_tags | default({}) | length > 0)
+       and (_telegraf_pg_tags | length > 0)) | bool }}
+
+# List of section names that are in the risky mixed state on this host.
+# Each map value renders as the string "True"/"False", so we cast with `| bool`
+# per item (a bare non-empty "False" string would otherwise be truthy) and keep
+# the keys whose cast value is true.
+_telegraf_colliding_sections: >-
+  {{ _telegraf_collision_sections | dict2items
+     | selectattr('value', 'match', '^True$')
+     | map(attribute='key') | list }}
+
+# A representative section name for the fail hint. Length-guarded so it never
+# calls `first` on an empty list (which raises during eager fail_msg templating).
+_telegraf_collision_example: >-
+  {{ (_telegraf_colliding_sections | first)
+     if (_telegraf_colliding_sections | length > 0) else 'inputs' }}
