@@ -1,4 +1,31 @@
 ---
+- name: Assert no telegraf_group_<section> collision on multi-group hosts
+  # A plain `telegraf_group_<section>` cannot merge across groups: if two of this
+  # host's groups both set it, Ansible silently keeps only one BEFORE this role
+  # runs. We cannot see the dropped value, but we CAN see the tell-tale mixed
+  # usage (plain var + a per-group `__<group>` var for the same section) and fail
+  # early with a fix hint, instead of shipping a config that silently lost inputs.
+  ansible.builtin.assert:
+    that:
+      - _telegraf_colliding_sections | length == 0
+    fail_msg: >-
+      Telegraf config collision on host '{{ inventory_hostname }}' for section(s):
+      {{ _telegraf_colliding_sections | join(', ') }}.
+      This host is in multiple groups and mixes the plain `telegraf_group_<section>`
+      var with per-group `telegraf_group_<section>__<group>` vars for the same
+      section. The plain var is resolved from only ONE group by Ansible, so another
+      group's contribution may have been silently dropped (e.g. missing postgresql
+      inputs). Fix: rename the plain var in each group_vars file to the per-group
+      form by appending the group name, e.g. in group_vars/<group>.yml change
+      `telegraf_group_{{ _telegraf_collision_example }}:` to
+      `telegraf_group_{{ _telegraf_collision_example }}__<group>:`
+      (for instance `telegraf_group_{{ _telegraf_collision_example }}__pg_servers:`).
+      The role then merges every group's per-group vars across all of the host's groups.
+    success_msg: "No telegraf_group_<section> collisions detected on '{{ inventory_hostname }}'."
+  tags:
+    - telegraf
+    - telegraf-assert
+
 - name: Remove legacy/conflicting repository files and keys
   # Only removes *legacy* artefacts from older key/repo layouts. The current
   # repo file (influxdata) and key ({{ telegraf_signing_key_path }}) are managed
@@ -36,7 +63,7 @@
     repo: "deb [signed-by={{ telegraf_signing_key_path }}] https://repos.influxdata.com/debian stable main"
     filename: influxdata
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Install Telegraf
   ansible.builtin.apt:
