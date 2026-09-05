@@ -69,7 +69,11 @@
 {{ option }} = {{ value | string | lower }}
 {% elif value is list %}
 {%   if value %}
+{%     if value | select('boolean') | list | length == 0 and value | reject('number') | list | length == 0 %}
+{{ option }} = [{{ value | map('string') | join(', ') }}]
+{%     else %}
 {{ option }} = ["{{ value | map('string') | join('","') }}"]
+{%     endif %}
 {%   else %}
 {{ option }} = []
 {%   endif %}
